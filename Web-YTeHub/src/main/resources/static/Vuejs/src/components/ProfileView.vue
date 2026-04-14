@@ -1,5 +1,6 @@
 <template>
 
+
 <main class="pt-28 pb-16 px-4 md:px-8 max-w-screen-2xl mx-auto flex flex-col md:flex-row gap-8">
 <!-- Sidebar Navigation -->
 <aside class="w-full md:w-80 flex flex-col gap-2">
@@ -38,7 +39,7 @@
 </div>
 </aside>
 <!-- Main Content Area -->
-<section class="flex-1 flex flex-col gap-10">
+<section class="flex-1 flex flex-col gap-8">
 <!-- Profile Overview Header -->
 <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
 <div>
@@ -46,10 +47,8 @@
 <p class="text-on-surface-variant body-lg max-w-xl">Quản lý và cập nhật thông tin hồ sơ của bạn</p>
 </div>
 </div>
-<div class="gap-8">
-<!-- Profile Form -->
-<div class="space-y-8">
-<div class="bg-surface-container-low rounded-xl p-8 max-w-4xl">
+<!-- Profile Form Section -->
+<div class="bg-surface-container-lowest rounded-xl p-8 max-w-4xl shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-outline-variant/30">
 <form class="grid grid-cols-1 md:grid-cols-2 gap-6">
 <div class="flex flex-col gap-2">
 <label class="text-sm font-bold text-on-surface-variant" for="fullname">Họ và Tên</label>
@@ -64,10 +63,6 @@
 <input class="bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" id="phone" type="tel" value="+84 901 234 567"/>
 </div>
 <div class="flex flex-col gap-2">
-<label class="text-sm font-bold text-on-surface-variant" for="dob">Ngày sinh</label>
-<input class="bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" id="dob" type="date" value="1990-01-01"/>
-</div>
-<div class="flex flex-col gap-2">
 <label class="text-sm font-bold text-on-surface-variant" for="gender">Giới tính</label>
 <select class="bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" id="gender">
 <option selected="">Nam</option>
@@ -75,17 +70,40 @@
 <option>Khác</option>
 </select>
 </div>
-<div class="flex flex-col gap-2">
-<label class="text-sm font-bold text-on-surface-variant" for="nationality">Quốc tịch</label>
-<input class="bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" id="nationality" type="text" value="Việt Nam"/>
-</div>
 <div class="md:col-span-2 pt-4">
-<button class="bg-primary text-on-primary px-10 py-4 rounded-md font-bold hover:bg-primary-container transition-all shadow-lg shadow-primary/10" type="submit">
-                                    Lưu thay đổi
-                                </button>
+<button class="bg-primary text-on-primary px-10 py-3 rounded-md font-bold hover:bg-primary-container transition-all shadow-lg shadow-primary/10" type="submit">
+                        Cập nhật hồ sơ
+                    </button>
 </div>
 </form>
 </div>
-<!-- Shipping Address Section -->
-</div></div></section></main>
+<!-- Password Change Section -->
+<div class="bg-surface-container-lowest rounded-xl p-8 max-w-4xl shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-outline-variant/30">
+<div class="mb-6">
+<h3 class="font-headline text-xl font-bold text-on-surface">Thay đổi mật khẩu</h3>
+<p class="text-sm text-on-surface-variant">Để đảm bảo an toàn, vui lòng sử dụng mật khẩu mạnh</p>
+</div>
+<form class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="flex flex-col gap-2 md:col-span-2">
+<label class="text-sm font-bold text-on-surface-variant" for="current-password">Mật khẩu hiện tại</label>
+<input class="bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" id="current-password" placeholder="••••••••" type="password"/>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-sm font-bold text-on-surface-variant" for="new-password">Mật khẩu mới</label>
+<input class="bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" id="new-password" placeholder="••••••••" type="password"/>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-sm font-bold text-on-surface-variant" for="confirm-password">Xác nhận mật khẩu mới</label>
+<input class="bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" id="confirm-password" placeholder="••••••••" type="password"/>
+</div>
+<div class="md:col-span-2 pt-4">
+<button class="bg-primary text-on-primary px-10 py-3 rounded-md font-bold hover:bg-primary-container transition-all shadow-lg shadow-primary/10" type="submit">
+                        Lưu mật khẩu mới
+                    </button>
+</div>
+</form>
+</div>
+</section>
+</main>
+
 </template>

@@ -50,7 +50,8 @@
     <p class="text-on-surface-variant font-medium">Vui lòng đăng nhập vào tài khoản của bạn</p>
     </div>
     <!-- Form -->
-    <form class="space-y-6" onsubmit="return false;">
+
+      <form class="space-y-6" @submit.prevent="handleLogin">
 
     <div>
     <div class="flex justify-between items-center mb-2">
@@ -58,7 +59,14 @@
     </div>
     <div class="relative">
     <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-xl">mail</span>
-    <input class="w-full pl-12 pr-4 py-3.5 bg-surface-container-low border-none rounded-lg text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary transition-all font-body" id="email" name="email" placeholder="email@example.com" type="email"/>
+    <input
+  v-model="email"
+  class="w-full pl-12 pr-4 py-3.5 bg-surface-container-low border-none rounded-lg text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary transition-all font-body"
+  id="email"
+  name="email"
+  placeholder="email@example.com"
+  type="email"
+/>
     </div>
     </div>
 
@@ -74,7 +82,14 @@
     </div>
     <div class="relative">
     <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-xl">lock</span>
-    <input class="w-full pl-12 pr-12 py-3.5 bg-surface-container-low border-none rounded-lg text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary transition-all font-body" id="password" name="password" placeholder="••••••••" type="password"/>
+<input
+  v-model="password"
+  class="w-full pl-12 pr-12 py-3.5 bg-surface-container-low border-none rounded-lg text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary transition-all font-body"
+  id="password"
+  name="password"
+  placeholder="••••••••"
+  type="password"
+/>
     <button class="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors" type="button">
     <span class="material-symbols-outlined">visibility</span>
     </button>
@@ -84,9 +99,16 @@
     <input class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary bg-surface-container-low transition-all" id="remember" name="remember" type="checkbox"/>
     <label class="ml-3 text-sm font-medium text-on-surface-variant select-none" for="remember">Ghi nhớ đăng nhập</label>
     </div>
-    <button class="w-full bg-primary text-on-primary py-4 rounded-xl font-headline font-bold text-lg shadow-lg shadow-primary/20 hover:bg-primary-container active:scale-[0.98] transition-all" type="submit">
-                            Đăng nhập
-                        </button>
+<button
+  class="w-full bg-primary text-on-primary py-4 rounded-xl font-headline font-bold text-lg shadow-lg shadow-primary/20 hover:bg-primary-container active:scale-[0.98] transition-all"
+  type="submit"
+  :disabled="loading"
+>
+  {{ loading ? 'Đang đăng nhập...' : 'Đăng nhập' }}
+</button>
+                        <p v-if="errorMessage" class="text-red-500 text-sm mt-3">
+  {{ errorMessage }}
+</p>
     </form>
     <div class="relative my-10">
     <div class="absolute inset-0 flex items-center">
@@ -123,4 +145,45 @@
     </section>
     </main>
     </div>
+    
 </template>
+
+<script setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import axios from 'axios'
+
+const router = useRouter()
+
+const email = ref('')
+const password = ref('')
+const errorMessage = ref('')
+const loading = ref(false)
+
+const handleLogin = async () => {
+  errorMessage.value = ''
+  loading.value = true
+
+  try {
+    const res = await axios.post('http://localhost:8080/api/auth/login', {
+      email: email.value,
+      password: password.value
+    }, {
+      withCredentials: true
+    })
+
+    // báo cho Header biết là đã login thành công
+    window.dispatchEvent(new Event('login-success'))
+
+    if (res.data.role === 'admin' || res.data.role === 'ADMIN') {
+      router.push('/admin')
+    } else {
+      router.push('/')
+    }
+  } catch (error) {
+    errorMessage.value = error.response?.data?.message || 'Đăng nhập thất bại'
+  } finally {
+    loading.value = false
+  }
+}
+</script>

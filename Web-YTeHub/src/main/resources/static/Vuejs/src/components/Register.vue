@@ -50,33 +50,33 @@
 <p class="text-on-surface-variant font-medium">Tham gia cộng đồng Aura Medical ngay hôm nay.</p>
 </div>
 <!-- Form -->
-<form class="space-y-4" onsubmit="return false;">
+<form class="space-y-4" @submit.prevent="register">
 <div>
 <label class="block font-label text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2" for="fullname">Họ và tên</label>
 <div class="relative">
 <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-xl">person</span>
-<input class="w-full pl-12 pr-4 py-3 bg-surface-container-low border-none rounded-lg text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary transition-all font-body" id="fullname" name="fullname" placeholder="Nguyễn Văn A" type="text"/>
+<input v-model="form.fullName" class="w-full pl-12 pr-4 py-3 bg-surface-container-low border-none rounded-lg text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary transition-all font-body" id="fullname" name="fullname" placeholder="Nguyễn Văn A" type="text"/>
 </div>
 </div>
 <div>
 <label class="block font-label text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2" for="email">Email</label>
 <div class="relative">
 <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-xl">mail</span>
-<input class="w-full pl-12 pr-4 py-3 bg-surface-container-low border-none rounded-lg text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary transition-all font-body" id="email" name="email" placeholder="email@example.com" type="email"/>
+<input v-model="form.email" class="w-full pl-12 pr-4 py-3 bg-surface-container-low border-none rounded-lg text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary transition-all font-body" id="email" name="email" placeholder="email@example.com" type="email"/>
 </div>
 </div>
 <div>
 <label class="block font-label text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2" for="phone">Số điện thoại</label>
 <div class="relative">
 <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-xl">call</span>
-<input class="w-full pl-12 pr-4 py-3 bg-surface-container-low border-none rounded-lg text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary transition-all font-body" id="phone" name="phone" placeholder="0901234567" type="tel"/>
+<input v-model="form.phone"class="w-full pl-12 pr-4 py-3 bg-surface-container-low border-none rounded-lg text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary transition-all font-body" id="phone" name="phone" placeholder="0901234567" type="tel"/>
 </div>
 </div>
 <div>
 <label class="block font-label text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2" for="password">Mật khẩu</label>
 <div class="relative">
 <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-xl">lock</span>
-<input class="w-full pl-12 pr-12 py-3 bg-surface-container-low border-none rounded-lg text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary transition-all font-body" id="password" name="password" placeholder="••••••••" type="password"/>
+<input v-model="form.password"class="w-full pl-12 pr-12 py-3 bg-surface-container-low border-none rounded-lg text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary transition-all font-body" id="password" name="password" placeholder="••••••••" type="password"/>
 <button class="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors" type="button">
 <span class="material-symbols-outlined text-xl">visibility</span>
 </button>
@@ -86,15 +86,19 @@
 <label class="block font-label text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2" for="confirm-password">Xác nhận mật khẩu</label>
 <div class="relative">
 <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-xl">lock_clock</span>
-<input class="w-full pl-12 pr-4 py-3 bg-surface-container-low border-none rounded-lg text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary transition-all font-body" id="confirm-password" name="confirm-password" placeholder="••••••••" type="password"/>
+<input v-model="form.confirmPassword" class="w-full pl-12 pr-4 py-3 bg-surface-container-low border-none rounded-lg text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary transition-all font-body" id="confirm-password" name="confirm-password" placeholder="••••••••" type="password"/>
 </div>
 </div>
 <div class="flex items-start">
-<input class="mt-1 w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary bg-surface-container-low transition-all" id="terms" name="terms" type="checkbox"/>
+<input v-model="form.acceptTerms" class="mt-1 w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary bg-surface-container-low transition-all" id="terms" name="terms" type="checkbox"/>
 <label class="ml-3 text-sm font-medium text-on-surface-variant select-none" for="terms">
                             Tôi đồng ý với <a class="text-primary font-bold hover:underline" href="#">Điều khoản &amp; Chính sách</a>
 </label>
 </div>
+
+        <p v-if="errorMessage" class="text-red-600 text-sm">{{ errorMessage }}</p>
+        <p v-if="successMessage" class="text-green-600 text-sm">{{ successMessage }}</p>
+
 <button class="w-full bg-primary text-on-primary py-4 rounded-xl font-headline font-bold text-lg shadow-lg shadow-primary/20 hover:bg-primary-container active:scale-[0.98] transition-all" type="submit">
                         Đăng ký
                     </button>
@@ -115,3 +119,39 @@
 </main>
 </div>
 </template>
+<script setup>
+import { reactive, ref } from 'vue'
+import axios from 'axios'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+const form = reactive({
+  fullName: '',
+  email: '',
+  phone: '',
+  password: '',
+  confirmPassword: '',
+  acceptTerms: false
+})
+
+const errorMessage = ref('')
+const successMessage = ref('')
+
+const register = async () => {
+  errorMessage.value = ''
+  successMessage.value = ''
+
+  try {
+    const res = await axios.post('http://localhost:8080/api/auth/register', form)
+
+    successMessage.value = res.data.message || 'Đăng ký thành công'
+    setTimeout(() => {
+      router.push('/login')
+    }, 1200)
+  } catch (error) {
+    errorMessage.value =
+      error.response?.data?.message || 'Đăng ký thất bại, vui lòng thử lại'
+  }
+}
+</script>
