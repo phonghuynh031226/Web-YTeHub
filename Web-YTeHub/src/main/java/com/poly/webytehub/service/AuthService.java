@@ -73,4 +73,11 @@ public class AuthService {
 
         return userRepository.save(user);
     }
+
+    public void forgotPassword(String email) {
+        userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Email không tồn tại trong hệ thống"));
+
+        // mail chưa có
+    }
 }

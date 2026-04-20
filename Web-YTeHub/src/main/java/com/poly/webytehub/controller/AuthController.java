@@ -74,6 +74,24 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> body) {
+        try {
+            String email = body.get("email");
+            if (email == null || email.isBlank()) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Email không được để trống"));
+            }
+
+            authService.forgotPassword(email);
+
+            return ResponseEntity.ok(Map.of(
+                    "message", "Email hợp lệ. Bạn có thể nối thêm chức năng gửi mail đặt lại mật khẩu sau."
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
     @GetMapping("/me")
     public ResponseEntity<?> me(HttpSession session) {
         User user = (User) session.getAttribute("currentUser");

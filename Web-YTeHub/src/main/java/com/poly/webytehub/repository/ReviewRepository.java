@@ -6,5 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface ReviewRepository extends JpaRepository<Review, Integer> {
-    List<Review> findByProductProductID(Integer productId);
+    List<Review> findByProductProductIDOrderByReviewIDDesc(Integer productId);
+    boolean existsByUserUserIDAndProductProductID(Integer userId, Integer productId);
 }

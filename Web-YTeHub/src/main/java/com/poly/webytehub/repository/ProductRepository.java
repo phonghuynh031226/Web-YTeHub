@@ -11,10 +11,8 @@ import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, Integer> {
 
-    // sản phẩm mới: mới thêm vào
     List<Product> findTop8ByOrderByCreatedDateDesc();
 
-    // sản phẩm nổi bật: bán nhiều nhất
     @Query("""
         SELECT od.product
         FROM OrderDetail od

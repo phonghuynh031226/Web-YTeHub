@@ -1,6 +1,6 @@
 <script setup>
-import Header from './components/header.vue'
-import Footer from './components/footer.vue'
+import Header from './components/layouts/header.vue'
+import Footer from './components/layouts/footer.vue'
 import { onMounted } from 'vue'
 import axios from 'axios'
 
@@ -14,9 +14,5 @@ onMounted(async () => {
 </script>
 
 <template>
-    <Header />
-  
   <router-view />
-  
-    <Footer />
 </template>

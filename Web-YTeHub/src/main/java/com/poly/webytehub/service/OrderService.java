@@ -4,6 +4,7 @@ import com.poly.webytehub.dto.OrderRequest;
 import com.poly.webytehub.entity.*;
 import com.poly.webytehub.repository.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -42,6 +43,7 @@ public class OrderService {
         return orderRepository.findByUserUserIDOrderByOrderDateDesc(userId);
     }
 
+    @Transactional
     public Order createOrder(Integer userId, OrderRequest request) {
         User user = userRepository.findById(userId).orElseThrow();
         Address address = addressRepository.findById(request.getAddressId())
@@ -56,14 +58,14 @@ public class OrderService {
             throw new RuntimeException("Giỏ hàng đang trống");
         }
 
-        BigDecimal total = BigDecimal.ZERO;
+        BigDecimal subtotal = BigDecimal.ZERO;
 
         for (Cart item : cartItems) {
             Product product = item.getProduct();
             if (product.getStock() < item.getQuantity()) {
                 throw new RuntimeException("Sản phẩm " + product.getProductName() + " không đủ tồn kho");
             }
-            total = total.add(product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
+            subtotal = subtotal.add(product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
         }
 
         Voucher voucher = null;
@@ -77,21 +79,37 @@ public class OrderService {
                 throw new RuntimeException("Mã giảm giá đã hết hạn");
             }
 
-            if (total.compareTo(voucher.getMinOrderValue()) < 0) {
+            if (totalBeforeDiscount(subtotal, request).compareTo(voucher.getMinOrderValue()) < 0) {
                 throw new RuntimeException("Đơn hàng chưa đủ giá trị tối thiểu để dùng mã");
             }
 
-            discount = voucher.getDiscountValue();
+            discount = voucher.getDiscountValue() == null ? BigDecimal.ZERO : voucher.getDiscountValue();
         }
 
-        BigDecimal finalAmount = total.subtract(discount);
+        if (discount.compareTo(BigDecimal.ZERO) < 0) {
+            discount = BigDecimal.ZERO;
+        }
+
+        BigDecimal shippingFee = normalizedShippingFee(request.getShippingFee());
+
+        // DB đang có ràng buộc:
+        //   FinalAmount = TotalAmount - DiscountAmount
+        // và không có cột ShippingFee riêng.
+        // Vì vậy TotalAmount phải bao gồm cả phí ship để không vi phạm constraint.
+        BigDecimal totalAmount = subtotal.add(shippingFee);
+
+        if (discount.compareTo(totalAmount) > 0) {
+            discount = totalAmount;
+        }
+
+        BigDecimal finalAmount = totalAmount.subtract(discount);
 
         Order order = new Order();
         order.setUser(user);
         order.setAddress(address);
         order.setVoucher(voucher);
         order.setOrderDate(LocalDateTime.now());
-        order.setTotalAmount(total);
+        order.setTotalAmount(totalAmount);
         order.setDiscountAmount(discount);
         order.setFinalAmount(finalAmount);
         order.setPaymentMethod(request.getPaymentMethod());
@@ -116,5 +134,16 @@ public class OrderService {
 
         cartRepository.deleteByUserUserID(userId);
         return order;
+    }
+
+    private BigDecimal normalizedShippingFee(BigDecimal shippingFee) {
+        if (shippingFee == null || shippingFee.compareTo(BigDecimal.ZERO) < 0) {
+            return BigDecimal.ZERO;
+        }
+        return shippingFee;
+    }
+
+    private BigDecimal totalBeforeDiscount(BigDecimal subtotal, OrderRequest request) {
+        return subtotal.add(normalizedShippingFee(request.getShippingFee()));
     }
 }

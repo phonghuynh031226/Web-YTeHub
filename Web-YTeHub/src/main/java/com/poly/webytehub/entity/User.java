@@ -28,6 +28,7 @@ public class User {
     @Column(name = "Phone", nullable = false, unique = true, length = 20)
     private String phone;
 
+    @JsonIgnore
     @Column(name = "Password", nullable = false, length = 255)
     private String password;
 

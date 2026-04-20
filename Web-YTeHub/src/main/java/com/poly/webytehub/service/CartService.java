@@ -8,6 +8,7 @@ import com.poly.webytehub.repository.CartRepository;
 import com.poly.webytehub.repository.ProductRepository;
 import com.poly.webytehub.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -28,8 +29,11 @@ public class CartService {
         return cartRepository.findByUserUserID(userId);
     }
 
+    @Transactional
     public Cart addToCart(Integer userId, CartRequest request) {
-        User user = userRepository.findById(userId).orElseThrow();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
+
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
 
@@ -48,6 +52,7 @@ public class CartService {
         return cartRepository.save(cart);
     }
 
+    @Transactional
     public Cart updateQuantity(Integer userId, Integer cartId, Integer quantity) {
         Cart cart = cartRepository.findById(cartId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy giỏ hàng"));
@@ -65,6 +70,7 @@ public class CartService {
         return cartRepository.save(cart);
     }
 
+    @Transactional
     public void deleteItem(Integer userId, Integer cartId) {
         Cart cart = cartRepository.findById(cartId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy giỏ hàng"));
