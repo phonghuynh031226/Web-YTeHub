@@ -7,4 +7,5 @@ import lombok.Setter;
 @Setter
 public class AdminCategoryRequest {
     private String categoryName;
+    private Boolean active;
 }

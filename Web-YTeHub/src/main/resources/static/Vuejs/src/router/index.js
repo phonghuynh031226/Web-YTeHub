@@ -23,6 +23,7 @@ import Dashboard from '../admin/pages/Dashboard.vue'
 import ProductManager from '../admin/pages/ProductManager.vue'
 import OrderManager from '../admin/pages/OrderManager.vue'
 import UserManager from '../admin/pages/UserManager.vue'
+import VoucherManager from '../admin/pages/VoucherManager.vue'
 
 const routes = [
   {
@@ -56,7 +57,8 @@ const routes = [
       { path: '', component: Dashboard, meta: { requiresAuth: true, requiresAdmin: true } },
       { path: 'products', component: ProductManager, meta: { requiresAuth: true, requiresAdmin: true } },
       { path: 'orders', component: OrderManager, meta: { requiresAuth: true, requiresAdmin: true } },
-      { path: 'users', component: UserManager, meta: { requiresAuth: true, requiresAdmin: true } }
+      { path: 'users', component: UserManager, meta: { requiresAuth: true, requiresAdmin: true } },
+      { path: 'vouchers', component: VoucherManager, meta: { requiresAuth: true, requiresAdmin: true } }
     ]
   }
 ]

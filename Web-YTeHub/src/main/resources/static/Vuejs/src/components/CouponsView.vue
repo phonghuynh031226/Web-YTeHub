@@ -21,7 +21,8 @@
         </div>
 
         <span :class="isExpired(item) ? 'bg-error-container text-on-error-container' : 'bg-tertiary-fixed text-on-tertiary-fixed-variant'" class="px-3 py-1 rounded-full text-[10px] font-bold uppercase">
-          {{ isExpired(item) ? 'EXPIRED' : 'ACTIVE' }}
+
+          {{ isExpired(item) ? 'Hết hạn' : 'Còn hạn' }}
         </span>
       </div>
 

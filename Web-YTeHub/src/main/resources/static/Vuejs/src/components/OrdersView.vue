@@ -64,6 +64,17 @@
           </div>
         </div>
 
+        <div v-if="getOrderItems(order).length" class="mt-6 pt-6 border-t border-outline-variant/10 space-y-3">
+          <div v-for="item in getOrderItems(order)" :key="item.orderDetailID || item.productID" class="flex items-center gap-4 bg-surface-container-low rounded-lg p-3">
+            <img :src="getImageUrl(item.imageURL)" class="w-14 h-14 rounded-lg object-cover bg-white" />
+            <div class="flex-1">
+              <p class="font-bold text-on-surface">{{ item.productName }}</p>
+              <p class="text-sm text-on-surface-variant">Số lượng: {{ item.quantity }} × {{ formatPrice(item.unitPrice) }}đ</p>
+            </div>
+            <p class="font-bold text-primary">{{ formatPrice(item.totalPrice) }}đ</p>
+          </div>
+        </div>
+
         <div class="mt-6 pt-6 border-t border-outline-variant/10 flex justify-between items-center">
           <div class="flex items-center gap-2">
             <p class="text-on-surface-variant text-sm">Tổng cộng:</p>
@@ -81,6 +92,7 @@
 import { ref, onMounted, computed } from 'vue'
 import axios from 'axios'
 
+const API_BASE = 'http://localhost:8080'
 const orders = ref([])
 const errorMessage = ref('')
 const searchKeyword = ref('')
@@ -117,6 +129,8 @@ const filteredOrders = computed(() => {
 })
 
 const formatPrice = (price) => Number(price || 0).toLocaleString('vi-VN')
+const getImageUrl = (imageURL) => imageURL ? `${API_BASE}/images/${imageURL}` : ''
+const getOrderItems = (order) => order.orderDetails || order.details || order.items || []
 const formatDate = (date) => new Date(date).toLocaleString('vi-VN')
 
 const getStatusClass = (status) => {

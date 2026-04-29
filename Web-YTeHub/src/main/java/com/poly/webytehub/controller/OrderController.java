@@ -29,9 +29,15 @@ public class OrderController {
     }
 
     @GetMapping
-    public List<Order> getMyOrders(HttpSession session) {
+    public List<Map<String, Object>> getMyOrders(HttpSession session) {
         User user = getCurrentUser(session);
         return orderService.getMyOrders(user.getUserID());
+    }
+
+    @GetMapping("/{id}")
+    public Map<String, Object> getMyOrderDetail(@PathVariable Integer id, HttpSession session) {
+        User user = getCurrentUser(session);
+        return orderService.getMyOrderDetail(user.getUserID(), id);
     }
 
     @PostMapping

@@ -52,7 +52,8 @@ const menuItems = [
   { to: '/admin', label: 'Dashboard', icon: 'dashboard' },
   { to: '/admin/products', label: 'Sản phẩm', icon: 'inventory_2' },
   { to: '/admin/orders', label: 'Đơn hàng', icon: 'shopping_bag' },
-  { to: '/admin/users', label: 'Khách hàng', icon: 'group' }
+  { to: '/admin/users', label: 'Khách hàng', icon: 'group' },
+  { to: '/admin/vouchers', label: 'Mã giảm giá', icon: 'sell' }
 ]
 
 const activePath = computed(() => route.path)

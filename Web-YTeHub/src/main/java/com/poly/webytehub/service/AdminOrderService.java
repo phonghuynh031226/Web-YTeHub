@@ -31,19 +31,14 @@ public class AdminOrderService {
                         && order.getUser().getFullName().toLowerCase(Locale.ROOT).contains(normalizedKeyword)))
                 .filter(order -> normalizedStatus.isBlank()
                         || (order.getOrderStatus() != null && order.getOrderStatus().toLowerCase(Locale.ROOT).equals(normalizedStatus)))
-                .map(order -> Map.<String, Object>of(
-                        "orderID", order.getOrderID(),
-                        "customerName", order.getUser() == null ? "" : order.getUser().getFullName(),
-                        "customerEmail", order.getUser() == null ? "" : order.getUser().getEmail(),
-                        "orderDate", order.getOrderDate(),
-                        "paymentMethod", order.getPaymentMethod(),
-                        "orderStatus", order.getOrderStatus(),
-                        "totalAmount", order.getTotalAmount(),
-                        "discountAmount", order.getDiscountAmount(),
-                        "finalAmount", order.getFinalAmount(),
-                        "itemCount", orderDetailRepository.countByOrderOrderID(order.getOrderID())
-                ))
+                .map(order -> OrderViewMapper.toOrderMap(order, orderDetailRepository.findByOrderOrderID(order.getOrderID())))
                 .toList();
+    }
+
+    public Map<String, Object> getOrderDetail(Integer orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
+        return OrderViewMapper.toOrderMap(order, orderDetailRepository.findByOrderOrderID(orderId));
     }
 
     public Order updateStatus(Integer orderId, String status) {

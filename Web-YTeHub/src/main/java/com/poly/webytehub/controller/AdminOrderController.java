@@ -26,6 +26,11 @@ public class AdminOrderController {
         return adminOrderService.getOrders(keyword, status);
     }
 
+    @GetMapping("/{id}")
+    public Map<String, Object> getOrderDetail(@PathVariable Integer id) {
+        return adminOrderService.getOrderDetail(id);
+    }
+
     @PutMapping("/{id}/status")
     public ResponseEntity<?> updateStatus(@PathVariable Integer id, @RequestBody AdminOrderStatusRequest request) {
         Order order = adminOrderService.updateStatus(id, request.getOrderStatus());

@@ -22,6 +22,9 @@ public class Category {
     @Column(name = "CategoryName", nullable = false, length = 100)
     private String categoryName;
 
+    @Column(name = "IsActive", nullable = false)
+    private Boolean active = true;
+
     @JsonIgnore
     @OneToMany(mappedBy = "category")
     private List<Product> products;

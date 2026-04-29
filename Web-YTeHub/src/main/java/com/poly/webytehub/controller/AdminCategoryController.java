@@ -6,6 +6,7 @@ import com.poly.webytehub.service.AdminCategoryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -19,6 +20,11 @@ public class AdminCategoryController {
         this.adminCategoryService = adminCategoryService;
     }
 
+    @GetMapping
+    public List<Category> getAll() {
+        return adminCategoryService.getAll();
+    }
+
     @PostMapping
     public ResponseEntity<?> create(@RequestBody AdminCategoryRequest request) {
         Category category = adminCategoryService.create(request);
@@ -26,5 +32,29 @@ public class AdminCategoryController {
                 "message", "Tạo danh mục thành công",
                 "category", category
         ));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> update(@PathVariable Integer id, @RequestBody AdminCategoryRequest request) {
+        Category category = adminCategoryService.update(id, request);
+        return ResponseEntity.ok(Map.of(
+                "message", "Cập nhật danh mục thành công",
+                "category", category
+        ));
+    }
+
+    @PutMapping("/{id}/active")
+    public ResponseEntity<?> setActive(@PathVariable Integer id, @RequestBody AdminCategoryRequest request) {
+        Category category = adminCategoryService.setActive(id, request.getActive() == null || request.getActive());
+        return ResponseEntity.ok(Map.of(
+                "message", category.getActive() ? "Đã hiện danh mục" : "Đã ẩn danh mục",
+                "category", category
+        ));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable Integer id) {
+        adminCategoryService.delete(id);
+        return ResponseEntity.ok(Map.of("message", "Xóa danh mục thành công"));
     }
 }

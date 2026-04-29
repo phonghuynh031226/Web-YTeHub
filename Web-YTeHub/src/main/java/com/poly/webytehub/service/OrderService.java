@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class OrderService {
@@ -39,8 +40,19 @@ public class OrderService {
         this.productRepository = productRepository;
     }
 
-    public List<Order> getMyOrders(Integer userId) {
-        return orderRepository.findByUserUserIDOrderByOrderDateDesc(userId);
+    public List<Map<String, Object>> getMyOrders(Integer userId) {
+        return orderRepository.findByUserUserIDOrderByOrderDateDesc(userId).stream()
+                .map(order -> OrderViewMapper.toOrderMap(order, orderDetailRepository.findByOrderOrderID(order.getOrderID())))
+                .toList();
+    }
+
+    public Map<String, Object> getMyOrderDetail(Integer userId, Integer orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
+        if (order.getUser() == null || !order.getUser().getUserID().equals(userId)) {
+            throw new RuntimeException("Không có quyền xem đơn hàng này");
+        }
+        return OrderViewMapper.toOrderMap(order, orderDetailRepository.findByOrderOrderID(orderId));
     }
 
     @Transactional
@@ -53,9 +65,16 @@ public class OrderService {
             throw new RuntimeException("Địa chỉ không hợp lệ");
         }
 
-        List<Cart> cartItems = cartRepository.findByUserUserID(userId);
+        List<Cart> allCartItems = cartRepository.findByUserUserID(userId);
+        List<Integer> selectedCartIds = request.getCartIds();
+        List<Cart> cartItems = allCartItems;
+        if (selectedCartIds != null && !selectedCartIds.isEmpty()) {
+            cartItems = allCartItems.stream()
+                    .filter(item -> selectedCartIds.contains(item.getCartID()))
+                    .toList();
+        }
         if (cartItems.isEmpty()) {
-            throw new RuntimeException("Giỏ hàng đang trống");
+            throw new RuntimeException("Vui lòng chọn sản phẩm cần thanh toán");
         }
 
         BigDecimal subtotal = BigDecimal.ZERO;
@@ -132,7 +151,11 @@ public class OrderService {
             productRepository.save(product);
         }
 
-        cartRepository.deleteByUserUserID(userId);
+        if (selectedCartIds != null && !selectedCartIds.isEmpty()) {
+            cartRepository.deleteSelectedByUser(userId, selectedCartIds);
+        } else {
+            cartRepository.deleteByUserUserID(userId);
+        }
         return order;
     }
 

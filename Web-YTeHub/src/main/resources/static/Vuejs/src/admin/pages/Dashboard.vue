@@ -145,7 +145,7 @@
                   class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-tighter"
                   :class="getStatusClass(order.status)"
                 >
-                  {{ order.status || 'Chờ xử lý' }}
+                  {{ formatStatus(order.status) }}
                 </span>
               </div>
             </div>
@@ -165,6 +165,7 @@ import { ref, onMounted } from 'vue'
 import axios from 'axios'
 
 const API_BASE = 'http://localhost:8080'
+
 const stats = ref({
   totalProducts: 0,
   totalCustomers: 0,
@@ -174,6 +175,8 @@ const stats = ref({
 const latestOrders = ref([])
 const weeklyRevenue = ref([])
 const errorMessage = ref('')
+
+/* ================= FORMAT ================= */
 
 const formatCurrency = (value) => {
   return Number(value || 0).toLocaleString('vi-VN') + ' ₫'
@@ -191,24 +194,45 @@ const getImageUrl = (imageURL) => {
   return imageURL ? `${API_BASE}/images/${imageURL}` : ''
 }
 
+/* ================= STATUS ================= */
+
+// map hiển thị tiếng Việt
+const formatStatus = (status) => {
+  const value = (status || '').toLowerCase()
+
+  if (value.includes('cancel')) return 'Đã hủy'
+  if (value.includes('pending')) return 'Chờ xử lý'
+  if (value.includes('processing')) return 'Đang xử lý'
+  if (value.includes('shipping') || value.includes('delivery')) return 'Đang giao'
+  if (value.includes('completed')) return 'Hoàn thành'
+
+  return 'Không xác định'
+}
+
+// màu theo status (dựa vào EN từ backend)
 const getStatusClass = (status) => {
   const value = (status || '').toLowerCase()
 
-  if (value.includes('chờ')) {
-    return 'bg-tertiary-container text-on-tertiary-container'
+  if (value.includes('pending')) {
+    return 'bg-yellow-100 text-yellow-700'
   }
-  if (value.includes('đóng gói') || value.includes('xử lý')) {
-    return 'bg-secondary-container text-on-secondary-container'
+  if (value.includes('processing')) {
+    return 'bg-blue-100 text-blue-700'
   }
-  if (value.includes('giao') || value.includes('hoàn thành')) {
+  if (value.includes('shipping') || value.includes('delivery')) {
     return 'bg-green-100 text-green-700'
   }
-  if (value.includes('hủy')) {
+  if (value.includes('completed')) {
+    return 'bg-green-200 text-green-800'
+  }
+  if (value.includes('cancel')) {
     return 'bg-red-100 text-red-700'
   }
 
-  return 'bg-surface-container-high text-on-surface'
+  return 'bg-gray-100 text-gray-600'
 }
+
+/* ================= CHART ================= */
 
 const getBarHeight = (value) => {
   const values = weeklyRevenue.value.map(i => Number(i.value || 0))
@@ -217,9 +241,11 @@ const getBarHeight = (value) => {
   return `${Math.max(percent, 8)}%`
 }
 
+/* ================= API ================= */
+
 const loadDashboardStats = async () => {
   try {
-    const res = await axios.get('http://localhost:8080/api/admin/dashboard/stats', {
+    const res = await axios.get(`${API_BASE}/api/admin/dashboard/stats`, {
       withCredentials: true
     })
 
@@ -235,7 +261,7 @@ const loadDashboardStats = async () => {
 
 const loadLatestOrders = async () => {
   try {
-    const res = await axios.get('http://localhost:8080/api/admin/dashboard/latest-orders', {
+    const res = await axios.get(`${API_BASE}/api/admin/dashboard/latest-orders`, {
       withCredentials: true
     })
 
@@ -247,7 +273,7 @@ const loadLatestOrders = async () => {
 
 const loadWeeklyRevenue = async () => {
   try {
-    const res = await axios.get('http://localhost:8080/api/admin/dashboard/weekly-revenue', {
+    const res = await axios.get(`${API_BASE}/api/admin/dashboard/weekly-revenue`, {
       withCredentials: true
     })
 

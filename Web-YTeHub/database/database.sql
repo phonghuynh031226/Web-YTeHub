@@ -35,6 +35,8 @@ CREATE TABLE Categories (
     CategoryName NVARCHAR(100) NOT NULL
 );
 GO
+ALTER TABLE Categories
+ADD IsActive BIT NOT NULL DEFAULT 1;
 
 CREATE TABLE Products (
     ProductID INT IDENTITY(1,1) PRIMARY KEY,

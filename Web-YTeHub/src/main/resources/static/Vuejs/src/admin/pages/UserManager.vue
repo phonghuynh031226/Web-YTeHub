@@ -20,10 +20,11 @@
           />
         </div>
         <select v-model="filters.status" @change="loadUsers" class="px-4 py-2.5 rounded-lg bg-slate-100 text-sm border-none">
-          <option value="">Tất cả trạng thái</option>
-          <option value="active">Active</option>
-          <option value="locked">Locked</option>
-        </select>
+
+  <option value="">Tất cả trạng thái</option>
+  <option value="active">Đang hoạt động</option>
+  <option value="locked">Đã khóa</option>
+</select>
       </div>
 
       <div v-if="errorMessage" class="px-4 py-3 text-sm bg-red-50 text-red-600 border-b border-red-100">
@@ -59,7 +60,8 @@
               <td class="px-6 py-4 text-center font-semibold">{{ user.orderCount || 0 }}</td>
               <td class="px-6 py-4 text-center">
                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold" :class="getStatusClass(user.accountStatus)">
-                  {{ user.accountStatus }}
+
+                  {{ formatUserStatus(user.accountStatus) }}
                 </span>
               </td>
               <td class="px-6 py-4 text-right">
@@ -69,6 +71,7 @@
                   :class="user.accountStatus === 'active' ? 'bg-red-50 text-red-600 hover:bg-red-100' : 'bg-green-50 text-green-700 hover:bg-green-100'"
                 >
                   {{ user.accountStatus === 'active' ? 'Khóa' : 'Mở khóa' }}
+                  
                 </button>
               </td>
             </tr>
@@ -92,13 +95,28 @@ const filters = ref({
   status: ''
 })
 
-const getStatusClass = (status) => status === 'active'
-  ? 'bg-green-100 text-green-700'
-  : 'bg-red-100 text-red-700'
+/* ===== FORMAT STATUS ===== */
+
+const formatUserStatus = (status) => {
+  if (status === 'active') return 'Đang hoạt động'
+  if (status === 'locked') return 'Đã khóa'
+  return 'Không xác định'
+}
+
+/* ===== STATUS COLOR ===== */
+
+const getStatusClass = (status) => {
+  if (status === 'active') return 'bg-green-100 text-green-700'
+  if (status === 'locked') return 'bg-red-100 text-red-700'
+  return 'bg-gray-100 text-gray-600'
+}
+
+/* ===== API ===== */
 
 const loadUsers = async () => {
   loading.value = true
   errorMessage.value = ''
+
   try {
     const res = await axios.get('http://localhost:8080/api/admin/users', {
       params: {
@@ -107,6 +125,7 @@ const loadUsers = async () => {
       },
       withCredentials: true
     })
+
     users.value = res.data || []
   } catch (error) {
     errorMessage.value = error.response?.data?.message || 'Không tải được danh sách khách hàng'
@@ -117,12 +136,14 @@ const loadUsers = async () => {
 
 const toggleStatus = async (user) => {
   const nextStatus = user.accountStatus === 'active' ? 'locked' : 'active'
+
   try {
-    await axios.put(`http://localhost:8080/api/admin/users/${user.userID}/status`, {
-      accountStatus: nextStatus
-    }, {
-      withCredentials: true
-    })
+    await axios.put(
+      `http://localhost:8080/api/admin/users/${user.userID}/status`,
+      { accountStatus: nextStatus },
+      { withCredentials: true }
+    )
+
     user.accountStatus = nextStatus
   } catch (error) {
     errorMessage.value = error.response?.data?.message || 'Không thể cập nhật trạng thái người dùng'

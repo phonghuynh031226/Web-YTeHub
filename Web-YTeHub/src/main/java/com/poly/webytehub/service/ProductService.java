@@ -17,7 +17,7 @@ public class ProductService {
     }
 
     public List<Product> getNewProducts() {
-        return productRepository.findTop8ByOrderByCreatedDateDesc();
+        return productRepository.findTop8ByCategoryActiveTrueOrderByCreatedDateDesc();
     }
 
     public List<Product> getFeaturedProducts() {
@@ -26,7 +26,9 @@ public class ProductService {
     }
 
     public List<Product> getAllProducts() {
-        return productRepository.findAll();
+        return productRepository.findAll().stream()
+                .filter(product -> product.getCategory() == null || Boolean.TRUE.equals(product.getCategory().getActive()))
+                .toList();
     }
 
     public Product getById(Integer id) {

@@ -131,7 +131,7 @@
               </select>
               <button
                 type="button"
-                @click="showCategoryModal = true"
+                @click="openCategoryModal"
                 class="px-4 py-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 font-semibold whitespace-nowrap"
               >
                 + Danh mục
@@ -186,31 +186,46 @@
     </div>
 
     <div v-if="showCategoryModal" class="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-[60]">
-      <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
+      <div class="w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden">
         <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-          <h3 class="text-lg font-bold">Thêm danh mục</h3>
+          <h3 class="text-lg font-bold">Quản lý danh mục</h3>
           <button @click="closeCategoryModal" class="text-slate-500 hover:text-slate-800">
             <span class="material-symbols-outlined">close</span>
           </button>
         </div>
 
-        <form @submit.prevent="submitCategory" class="p-6 space-y-4">
-          <div>
-            <label class="block text-sm font-semibold mb-1">Tên danh mục</label>
-            <input v-model="newCategoryName" class="w-full rounded-lg border border-slate-300 px-4 py-2.5" placeholder="Ví dụ: Máy đo đường huyết" required />
-          </div>
+        <div class="p-6 space-y-5">
+          <form @submit.prevent="submitCategory" class="flex flex-col md:flex-row gap-3">
+            <input v-model="categoryForm.categoryName" class="flex-1 rounded-lg border border-slate-300 px-4 py-2.5" placeholder="Tên danh mục" required />
+            <button type="submit" class="px-5 py-2.5 rounded-lg bg-primary text-white font-semibold hover:opacity-90">
+              {{ categorySaving ? 'Đang lưu...' : (editingCategoryId ? 'Cập nhật' : 'Thêm danh mục') }}
+            </button>
+            <button v-if="editingCategoryId" type="button" @click="resetCategoryForm" class="px-4 py-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 font-semibold">Hủy sửa</button>
+          </form>
 
           <div v-if="categoryError" class="text-sm text-red-600 bg-red-50 px-4 py-3 rounded-lg">
             {{ categoryError }}
           </div>
 
-          <div class="flex justify-end gap-3">
-            <button type="button" @click="closeCategoryModal" class="px-4 py-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 font-semibold">Hủy</button>
-            <button type="submit" class="px-5 py-2.5 rounded-lg bg-primary text-white font-semibold hover:opacity-90">
-              {{ categorySaving ? 'Đang lưu...' : 'Tạo danh mục' }}
-            </button>
+          <div class="max-h-[420px] overflow-y-auto divide-y divide-slate-100 border border-slate-200 rounded-xl">
+            <div v-if="categories.length === 0" class="p-4 text-sm text-slate-500">Chưa có danh mục.</div>
+            <div v-for="category in categories" :key="category.categoryID" class="p-4 flex items-center justify-between gap-3">
+              <div>
+                <p class="font-bold text-on-surface">{{ category.categoryName }}</p>
+                <p class="text-xs" :class="category.active === false ? 'text-slate-400' : 'text-green-600'">
+                  {{ category.active === false ? 'Đang ẩn' : 'Đang hiện' }}
+                </p>
+              </div>
+              <div class="flex flex-wrap justify-end gap-2">
+                <button @click="editCategory(category)" class="px-3 py-1.5 text-sm rounded-lg bg-slate-100 hover:bg-slate-200">Sửa</button>
+                <button @click="toggleCategory(category)" class="px-3 py-1.5 text-sm rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100">
+                  {{ category.active === false ? 'Hiện' : 'Ẩn' }}
+                </button>
+                <button @click="deleteCategory(category)" class="px-3 py-1.5 text-sm rounded-lg bg-red-50 text-red-600 hover:bg-red-100">Xóa</button>
+              </div>
+            </div>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   </main>
@@ -236,7 +251,8 @@ const categories = ref([])
 const stats = ref({})
 const imageFile = ref(null)
 const imagePreview = ref('')
-const newCategoryName = ref('')
+const categoryForm = ref({ categoryName: '' })
+const editingCategoryId = ref(null)
 
 const filters = ref({
   keyword: '',
@@ -291,7 +307,7 @@ const loadProducts = async () => {
 
 const loadCategories = async () => {
   try {
-    const response = await axios.get(`${API_BASE}/api/categories`, { withCredentials: true })
+    const response = await axios.get(`${API_BASE}/api/admin/categories`, { withCredentials: true })
     categories.value = response.data || []
   } catch (error) {
     errorMessage.value = error.response?.data?.message || 'Không thể tải danh mục'
@@ -346,11 +362,26 @@ const closeModal = () => {
   resetImageState()
 }
 
+const openCategoryModal = () => {
+  resetCategoryForm()
+  showCategoryModal.value = true
+}
+
 const closeCategoryModal = () => {
   showCategoryModal.value = false
   categorySaving.value = false
   categoryError.value = ''
-  newCategoryName.value = ''
+  resetCategoryForm()
+}
+
+const resetCategoryForm = () => {
+  editingCategoryId.value = null
+  categoryForm.value = { categoryName: '' }
+}
+
+const editCategory = (category) => {
+  editingCategoryId.value = category.categoryID
+  categoryForm.value = { categoryName: category.categoryName || '' }
 }
 
 const handleImageChange = (event) => {
@@ -384,24 +415,45 @@ const submitCategory = async () => {
   categoryError.value = ''
 
   try {
-    const response = await axios.post(`${API_BASE}/api/admin/categories`, {
-      categoryName: newCategoryName.value
-    }, {
-      withCredentials: true
-    })
+    const payload = { categoryName: categoryForm.value.categoryName }
+    const response = editingCategoryId.value
+      ? await axios.put(`${API_BASE}/api/admin/categories/${editingCategoryId.value}`, payload, { withCredentials: true })
+      : await axios.post(`${API_BASE}/api/admin/categories`, payload, { withCredentials: true })
 
-    const createdCategory = response.data?.category
+    const savedCategory = response.data?.category
     await loadCategories()
 
-    if (createdCategory?.categoryID) {
-      form.value.categoryId = createdCategory.categoryID
+    if (savedCategory?.categoryID) {
+      form.value.categoryId = savedCategory.categoryID
     }
 
-    closeCategoryModal()
+    resetCategoryForm()
   } catch (error) {
-    categoryError.value = error.response?.data?.message || 'Không thể tạo danh mục'
+    categoryError.value = error.response?.data?.message || 'Không thể lưu danh mục'
   } finally {
     categorySaving.value = false
+  }
+}
+
+const toggleCategory = async (category) => {
+  try {
+    await axios.put(`${API_BASE}/api/admin/categories/${category.categoryID}/active`, {
+      active: category.active === false
+    }, { withCredentials: true })
+    await loadCategories()
+  } catch (error) {
+    categoryError.value = error.response?.data?.message || 'Không thể cập nhật trạng thái danh mục'
+  }
+}
+
+const deleteCategory = async (category) => {
+  if (!window.confirm(`Xóa danh mục "${category.categoryName}"?`)) return
+  try {
+    await axios.delete(`${API_BASE}/api/admin/categories/${category.categoryID}`, { withCredentials: true })
+    if (String(form.value.categoryId) === String(category.categoryID)) form.value.categoryId = ''
+    await loadCategories()
+  } catch (error) {
+    categoryError.value = error.response?.data?.message || 'Không thể xóa danh mục'
   }
 }
 

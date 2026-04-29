@@ -4,7 +4,7 @@
 <nav class="fixed top-0 w-full z-50 bg-surface/70 backdrop-blur-md border-b border-outline-variant/10">
 <div class="flex justify-between items-center h-20 px-8 w-full max-w-screen-2xl mx-auto">
 <div class="text-2xl font-black tracking-tighter text-[#003f87]">
-            Clinical Curator
+            YTEHUB
         </div>
 <div class="hidden md:flex items-center space-x-8">
 <router-link 

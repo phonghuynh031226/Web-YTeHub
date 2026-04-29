@@ -19,6 +19,6 @@ public class CategoryController {
 
     @GetMapping
     public List<Category> getAll() {
-        return categoryRepository.findAll();
+        return categoryRepository.findByActiveTrue();
     }
 }
